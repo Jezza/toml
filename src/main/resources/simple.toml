@@ -1,0 +1,18 @@
+
+
+a = ""
+[section]
+b = ""
+[[array]]
+c = ""
+[[array]]
+c = ""
+
+[metadata.VALUE]
+value = "text"
+other = true
+123456 = 0.5
+value = 0x163
+value0 = 0x163
+value1 = 0x163
+dd = 'asd'

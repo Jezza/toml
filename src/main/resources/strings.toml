@@ -1,0 +1,46 @@
+#\b         - backspace       (U+0008)
+#\t         - tab             (U+0009)
+#\n         - linefeed        (U+000A)
+#\f         - form feed       (U+000C)
+#\r         - carriage return (U+000D)
+#\"         - quote           (U+0022)
+#\\         - backslash       (U+005C)
+#\uXXXX     - unicode         (U+XXXX)
+#\UXXXXXXXX - unicode         (U+XXXXXXXX)
+
+str = "I'm a string. \"You can quote me\". Name\tJos\u00E9\nLocation\tSF."
+
+str1 = """
+Roses are red
+Violets are blue"""
+
+# The following strings are byte-for-byte equivalent:
+str1 = "The quick brown fox jumps over the lazy dog."
+
+str2 = """
+The quick brown \
+
+
+  fox jumps over \
+    the lazy dog."""
+
+str3 = """\
+       The quick brown \
+       fox jumps over \
+       the lazy dog.\
+       """
+
+# What you see is what you get.
+winpath  = 'C:\Users\nodejs\templates'
+winpath2 = '\\ServerX\admin$\system32\'
+quoted   = 'Tom "Dubs" Preston-Werner'
+regex    = '<\i\c*\s*>'
+
+
+regex2 = '''I [dw]on't need \d{2} apples'''
+lines  = '''
+The first newline is
+trimmed in raw strings.
+   All other whitespace
+   is preserved.
+'''

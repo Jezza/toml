@@ -1,0 +1,31 @@
+key = "value"
+bare_key = "value"
+bare-key = "value"
+1234 = "value"
+
+"127.0.0.1" = "value"
+"character encoding" = "value"
+"ʎǝʞ" = "value"
+'key2' = "value"
+'quoted "value"' = "value"
+
+#= "no key name"  # INVALID
+
+"" = "blank"     # VALID but discouraged
+'' = 'blank'     # VALID but discouraged
+
+name = "Orange"
+physical.color = "orange"
+physical.shape = "round"
+site."google.com" = true
+
+# DO NOT DO THIS
+#name = "Tom"
+#name = "Pradyun"
+
+a.b.c = 1
+a.d = 2
+
+# THIS IS INVALID
+#a.b = 1
+#a.b.c = 2
