@@ -1,0 +1,5 @@
+value = "nope"
+
+[metadata.a]
+aux = "overwrite"
+values = [ "value0"]

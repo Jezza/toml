@@ -6,11 +6,11 @@ package com.github.jezza.lang;
 public final class Tokens {
 	public static final int EOS = -1;
 	public static final int BAD_CHARACTER = 0;
-	public static final int WHITE_SPACE = 1;
-	public static final int COMMENT = 2;
 
 	public static final int STRING = 3;
+	public static final int ML_STRING = 4;
 	public static final int STRING_POISON = 5;
+	public static final int ML_STRING_POISON = 6;
 
 	public static final int INTEGER_DEC = 10;
 	public static final int INTEGER_HEX = 11;
@@ -43,14 +43,14 @@ public final class Tokens {
 				return "EOS";
 			case BAD_CHARACTER:
 				return "BAD_CHARACTER";
-			case WHITE_SPACE:
-				return "WHITE_SPACE";
-			case COMMENT:
-				return "COMMENT";
 			case STRING:
 				return "BASIC_STRING";
+			case ML_STRING:
+				return "ML_STRING";
 			case STRING_POISON:
 				return "BASIC_STRING_POISON";
+			case ML_STRING_POISON:
+				return "ML_STRING_POISON";
 			case INTEGER_DEC:
 				return "INTEGER_DEC";
 			case INTEGER_HEX:

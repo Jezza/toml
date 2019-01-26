@@ -1,0 +1,17 @@
+{
+    str = "I'm a string. "You can quote me". Name	José
+Location	SF.",
+    quoted = "Tom "Dubs" Preston-Werner",
+    regex = "<\i\c*\s*>",
+    regex2 = "I [dw]on't need \d{2} apples",
+    str3 = "The quick brown fox jumps over the lazy dog.",
+    winpath = "C:\Users\nodejs\templates",
+    str1 = "The quick brown fox jumps over the lazy dog.",
+    winpath2 = "\\ServerX\admin$\system32\",
+    str2 = "The quick brown fox jumps over the lazy dog.",
+    lines = "The first newline is
+trimmed in raw strings.
+   All other whitespace
+   is preserved.
+",
+}

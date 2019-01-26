@@ -9,9 +9,9 @@ public final class Token {
 	public final int type;
 	public final int row;
 	public final int col;
-	public final Object value;
+	public final String value;
 
-	public Token(int type, int row, int col, Object value) {
+	public Token(int type, int row, int col, String value) {
 		this.type = type;
 		this.row = row;
 		this.col = col;

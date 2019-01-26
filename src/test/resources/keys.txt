@@ -1,0 +1,26 @@
+{
+     = "blank",
+    a = {
+        b = {
+            c = 1,
+        },
+        d = 2,
+    },
+    key2 = "value",
+    bare_key = "value",
+    ʎǝʞ = "value",
+    site = {
+        google.com = true,
+    },
+    1234 = "value",
+    quoted "value" = "value",
+    name = "Orange",
+    bare-key = "value",
+    physical = {
+        color = "orange",
+        shape = "round",
+    },
+    character encoding = "value",
+    key = "value",
+    127.0.0.1 = "value",
+}

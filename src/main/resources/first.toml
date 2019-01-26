@@ -1,0 +1,10 @@
+others = "nope"
+name = "nope"
+
+[metadata.a]
+name = "value"
+aux = {asd = "asd", dw.2 = "asd"}
+values = [ "value0", "value1" ]
+
+[metadata.b]
+name = "value"

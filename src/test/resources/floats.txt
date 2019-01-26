@@ -1,0 +1,16 @@
+{
+    sf4 = NaN,
+    sf3 = -Infinity,
+    sf6 = NaN,
+    sf5 = NaN,
+    flt1 = 1.0,
+    flt2 = 3.1415,
+    flt3 = -0.01,
+    flt4 = 4.9999999999999996E22,
+    flt5 = 1000000.0,
+    flt6 = -0.02,
+    flt7 = 6.626E-34,
+    flt8 = 224617.445991228,
+    sf2 = Infinity,
+    sf1 = Infinity,
+}

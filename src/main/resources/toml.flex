@@ -23,17 +23,17 @@ import java.io.StringReader;
 %line
 %column
 %eofclose
-%debug
 
 %eofval{
 	return Token.EOS;
 %eofval}
 
-EOL="\r"|"\n"|"\r\n"
-WS=[\ \t\f]
-EOL_WS=({WS}|{EOL})+
+EOL = "\r" | "\n" | "\r\n"
+WS = [\ \t\f]
+EOL_WS = ( {WS} | {EOL} )+
+INPUT = [^\r\n]
 
-COMMENT=#[^\n\r]*
+COMMENT=#{INPUT}*{EOL}?
 
 INTEGER_DEC_SQ=[0-9](_?[0-9])*
 
@@ -42,7 +42,7 @@ INTEGER_HEX=[-+]?0x[0-9A-Fa-f](_?[0-9A-Fa-f])*
 INTEGER_OCT=[-+]?0o[0-7](_?[0-7])*
 INTEGER_BIN=[-+]?0b[01](_?[01])*
 
-FLOAT={INTEGER_DEC}(\.{INTEGER_DEC_SQ})?([eE]{INTEGER_DEC})?
+FLOAT=[-+]?{INTEGER_DEC}(\.{INTEGER_DEC_SQ})?([eE]{INTEGER_DEC})?
 
 INF=[-+]?inf
 NAN=[-+]?nan
@@ -52,18 +52,25 @@ DATE=[0-9]{4}-[0-9]{2}-[0-9]{2}([Tt][0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?)?([Zz]
 BOOLEAN=true|false
 KEY=[0-9_\-a-zA-Z]+
 
-%state S_BASIC_STRING, S_BASIC_STRING_RECOVERY, S_LITERAL_STRING, S_ML_BASIC_STRING
+BASIC_STRING_CHAR = [\u0020-\u0021\u0023-\u005B\u005D-\u007E\u0080-\U10FFFF]
+ML_BASIC_STRING_CHAR = {EOL_WS} | [\u0020-\u0021\u0023-\u005B\u005D-\u007E\u0080-\U10FFFF]
+LITERAL_STRING_CHAR = [\u0009\u0020-\u0026\u0028-\u007E\u0080-\U10FFFF]
+ML_LITERAL_STRING_CHAR = {EOL_WS} | [\u0009\u0020-\u0026\u0028-\u007E\u0080-\U10FFFF]
+
+%state S_BASIC_STRING, S_BASIC_STRING_RECOVERY, S_LITERAL_STRING, S_ML_BASIC_STRING, S_ML_LITERAL_STRING
 
 %%
 
 <YYINITIAL> {
-  {EOL_WS}              {}
+  {EOL_WS}+             {}
   {COMMENT}             {}
 
   \"                    { string.setLength(0); poisoned = false; yybegin(S_BASIC_STRING); }
-  '                     { string.setLength(0); poisoned = false; yybegin(S_LITERAL_STRING); }
-  \"\"\"{EOL_WS}        { string.setLength(0); yybegin(S_ML_BASIC_STRING); }
+  \"\"\"{EOL}           { string.setLength(0); yybegin(S_ML_BASIC_STRING); }
   \"\"\"                { string.setLength(0); yybegin(S_ML_BASIC_STRING); }
+  '                     { string.setLength(0); poisoned = false; yybegin(S_LITERAL_STRING); }
+  '''{EOL}              { string.setLength(0); yybegin(S_ML_LITERAL_STRING); }
+  '''                   { string.setLength(0); yybegin(S_ML_LITERAL_STRING); }
 
   {INTEGER_DEC}         { return new Token(INTEGER_DEC, yyline, yycolumn, yytext()); }
   {INTEGER_HEX}         { return new Token(INTEGER_HEX, yyline, yycolumn, yytext()); }
@@ -91,47 +98,62 @@ KEY=[0-9_\-a-zA-Z]+
 }
 
 <S_BASIC_STRING> {
-  \"                  { yybegin(YYINITIAL);
-                        return new Token(poisoned ? STRING_POISON : STRING, yyline, yycolumn, string.toString()); }
+  \"                   { yybegin(YYINITIAL);
+                         return new Token(poisoned ? STRING_POISON : STRING, yyline, yycolumn, string.toString()); }
 
-  [^\r\n\"\\]+        { string.append(yytext()); }
+  {BASIC_STRING_CHAR}+ { string.append(yytext()); }
 
-  \\b                 { string.append('\b'); }
-  \\t                 { string.append('\t'); }
-  \\n                 { string.append('\n'); }
-  \\f                 { string.append('\f'); }
-  \\r                 { string.append('\r'); }
-  \\\"                { string.append('\"'); }
-  \\                  { string.append('\\'); }
-  \\u[0-9A-Fa-f]{4}   { string.append((char) Integer.parseInt(yytext().substring(2), 16)); }
-  \\U[0-9A-Fa-f]{8}   { string.append(Character.toChars(Integer.parseInt(yytext().substring(2), 16))); }
+  \\b                  { string.append('\b'); }
+  \\t                  { string.append('\t'); }
+  \\n                  { string.append('\n'); }
+  \\f                  { string.append('\f'); }
+  \\r                  { string.append('\r'); }
+  \\\"                 { string.append('\"'); }
+  \\                   { string.append('\\'); }
+  \\u[0-9A-Fa-f]{4}    { string.append((char) Integer.parseInt(yytext().substring(2), 16)); }
+  \\U[0-9A-Fa-f]{8}    { string.append(Character.toChars(Integer.parseInt(yytext().substring(2), 16))); }
 
-  [^]                 { poisoned = true;}
-}
-
-<S_LITERAL_STRING> {
-	'               { yybegin(YYINITIAL);
-                      return new Token(poisoned ? STRING_POISON : STRING, yyline, yycolumn, string.toString()); }
-
-    [^']+ & {EOL}   { string.append(yytext());}
-
-    {EOL}           { poisoned = true;}
+  [^]                  { poisoned = true;}
 }
 
 <S_ML_BASIC_STRING> {
-	\"\"\"       { yybegin(YYINITIAL);
-                   return new Token(STRING, yyline, yycolumn, string.toString()); }
-    \\{EOL_WS}   { }
+	\"\"\"                         { yybegin(YYINITIAL);
+                                     return new Token(ML_STRING, yyline, yycolumn, string.toString()); }
+    \\{EOL_WS}                     { }
 
-	[^\"\\]+     { string.append(yytext()); }
+	{ML_BASIC_STRING_CHAR}+        { string.append(yytext()); }
 
-    \\b                 { string.append('\b'); }
-    \\t                 { string.append('\t'); }
-    \\n                 { string.append('\n'); }
-    \\f                 { string.append('\f'); }
-    \\r                 { string.append('\r'); }
-    \\\"                { string.append('\"'); }
-    \\                  { string.append('\\'); }
-    \\u[0-9A-Fa-f]{4}   { string.append((char) Integer.parseInt(yytext().substring(2), 16)); }
-    \\U[0-9A-Fa-f]{8}   { string.append(Character.toChars(Integer.parseInt(yytext().substring(2), 16))); }
+	\"\"                           { string.append("\"\""); }
+	\"                             { string.append('"'); }
+
+    \\b                            { string.append('\b'); }
+    \\t                            { string.append('\t'); }
+    \\n                            { string.append('\n'); }
+    \\f                            { string.append('\f'); }
+    \\r                            { string.append('\r'); }
+    \\\"                           { string.append('\"'); }
+    \\                             { string.append('\\'); }
+    \\u[0-9A-Fa-f]{4}              { string.append((char) Integer.parseInt(yytext().substring(2), 16)); }
+    \\U[0-9A-Fa-f]{8}              { string.append(Character.toChars(Integer.parseInt(yytext().substring(2), 16))); }
+}
+
+<S_LITERAL_STRING> {
+	'                        { yybegin(YYINITIAL);
+                               return new Token(poisoned ? STRING_POISON : STRING, yyline, yycolumn, string.toString()); }
+
+    {LITERAL_STRING_CHAR}+   { string.append(yytext()); }
+
+    [^]                      { poisoned = true;}
+}
+
+<S_ML_LITERAL_STRING> {
+	'''                         { yybegin(YYINITIAL);
+                                  return new Token(poisoned ? ML_STRING_POISON : ML_STRING, yyline, yycolumn, string.toString()); }
+
+	{ML_LITERAL_STRING_CHAR}+   { string.append(yytext()); }
+
+	''                          { string.append("''"); }
+	'                           { string.append('\''); }
+
+	[^]                         { poisoned = true; }
 }

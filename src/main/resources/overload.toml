@@ -1,0 +1,377 @@
+
+[mappings]
+TEST = [
+	"NAME",
+    "IDENTIFIER",
+    "DESCRIPTION",
+    "KEYWORDS",
+    "LANGUAGE",
+    "AUTHOR",
+    "CREATION_DATE",
+    "LAST_MODIFIED",
+    "STATUS",
+    "RESSOURCE_TYPE",
+    "FORMAT",
+    "TOOL",
+    "VERSION",
+    "PRODUCER",
+    "SKILLLEVEL",
+    "SUBJECT",
+    "MODULETITLE",
+    "MODULENUMBER",
+    "DEGREE",
+    "LEVEL",
+    "LEARNING_TIME",
+    "DIFFICULTY",
+]
+
+SURVEY = [
+	"NAME",
+    "IDENTIFIER",
+    "DESCRIPTION",
+    "KEYWORDS",
+    "LANGUAGE",
+    "AUTHOR",
+    "CREATION_DATE",
+    "LAST_MODIFIED",
+    "STATUS",
+    "RESSOURCE_TYPE",
+    "FORMAT",
+    "TOOL",
+    "VERSION",
+    "PRODUCER",
+    "SKILLLEVEL",
+    "SUBJECT",
+    "MODULETITLE",
+    "MODULENUMBER",
+    "DEGREE",
+    "LEVEL",
+    "LEARNING_TIME",
+    "DIFFICULTY",
+]
+
+QUESTION = [
+	"NAME",
+	"IDENTIFIER",
+	"DESCRIPTION",
+	"KEYWORDS",
+	"LANGUAGE",
+	"AUTHOR",
+	"CREATION_DATE",
+	"LAST_MODIFIED",
+	"STATUS",
+	"RESSOURCE_TYPE",
+	"ITEM_TYPE",
+	"FORMAT",
+	"TOOL",
+	"VERSION",
+	"PRODUCER",
+	"SKILLLEVEL",
+	"SUBJECT",
+	"MODULETITLE",
+	"MODULENUMBER",
+	"DEGREE",
+	"LEVEL",
+	"LEARNING_TIME",
+	"DIFFICULTY",
+]
+
+FOLDER = [
+	"NAME",
+    "DESCRIPTION",
+    "AUTHOR",
+    "CREATION_DATE",
+    "LAST_MODIFIED",
+    "RESSOURCE_TYPE",
+]
+
+########################
+# Metadata definitions #
+########################
+
+[metadata.NAME]
+type = "SINGLELINE"
+categories = ["GENERAL"]
+mandatory = true
+[metadata.NAME.lom]
+xpath = "general/title"
+field = "LANGSTRING"
+sort = 20
+
+[metadata.IDENTIFIER]
+type = "SINGLELINE"
+categories = ["GENERAL"]
+visible = false
+readOnly = true
+[metadata.IDENTIFIER.lom]
+xpath = "general/identifier/entry"
+field = "STRING"
+sort = 10
+
+[metadata.DESCRIPTION]
+type = "MULTILINE"
+categories = ["GENERAL"]
+[metadata.DESCRIPTION.lom]
+xpath = "general/description"
+field = "LANGSTRING"
+sort = 40
+
+[metadata.KEYWORDS]
+type = "MULTIVALUE"
+categories = ["GENERAL"]
+hasDescription = true
+autoCompletion = true
+[metadata.KEYWORDS.lom]
+xpath = "general/keyword"
+field = "LANGSTRING"
+sort = 50
+multi = "true"
+
+[metadata.LANGUAGE]
+type = "SELECTION"
+categories = ["GENERAL"]
+values = [
+	"",
+	"cs",
+	"de",
+	"en",
+	"es",
+	"fr",
+	"it",
+	"nl",
+	"no",
+	"pt",
+	"ru",
+	"sv",
+	"te",
+	"lus",
+	"hi",
+]
+defaultForSelection = true
+#choiceRenderer = "languageChoiceRenderer"
+sortValues = true
+[metadata.LANGUAGE.lom]
+xpath = "general/language"
+field = "STRING"
+sort = 30
+
+[metadata.AUTHOR]
+type = "SINGLELINE"
+categories = ["AUTHOR"]
+readOnly = true
+[metadata.AUTHOR.lom]
+xpath = "lifeCycle/contribute[author]"
+field = "CONTRIBUTE"
+sort = 100
+
+[metadata.CREATION_DATE]
+type = "DATE_FROM_TO"
+categories = ["AUTHOR"]
+readOnly = true
+
+[metadata.LEARNING_TIME]
+type = "DATE_FROM_TO"
+categories = ["CLASSIFICATION"]
+duration = true
+readOnly = false
+[metadata.LEARNING_TIME.lom]
+xpath = "educational/typicalLearningTime/duration"
+field = "STRING"
+sort = 320
+
+[metadata.LAST_MODIFIED]
+type = "DATE_FROM_TO"
+categories = ["AUTHOR"]
+readOnly = true
+
+[metadata.STATUS]
+type = "SELECTION"
+categories = ["AUTHOR"]
+values = [
+	"",
+	"draft",
+	"final",
+]
+defaultForSelection = true
+localized = true
+localizedPrefix = "edit.interaction.type.status."
+choiceRenderer = ""
+[metadata.STATUS.lom]
+xpath = "lifecycle/status"
+field = "SOURCEVALUE"
+
+[metadata.RESSOURCE_TYPE]
+type = "SELECTION"
+categories = ["TECHNICAL"]
+values = [
+	"",
+	"FOLDER",
+	"TEST",
+	"QUESTION",
+	"SURVEY",
+]
+readOnly = true
+localized = true
+localizedPrefix = "repo.entry.type."
+#choiceRenderer = "defaultChoiceRenderer"
+[metadata.RESSOURCE_TYPE.lom]
+xpath = "educational/learningResourceType"
+field = "SOURCEVALUE"
+sourcetype = "QTIv2.1"
+sort = 300
+
+[metadata.ITEM_TYPE]
+type = "SELECTION"
+categories = ["TECHNICAL"]
+values = [
+	"",
+	"SINGLE_CHOICE",
+	"MULTIPLE_CHOICE",
+	"EXTENDED_TEXT",
+	"MATRIX",
+	"TEXT_ENTRY",
+	"HOTSPOT",
+	"HOTTEXT",
+	"MATCH",
+	"NUMERIC",
+	"ORDER",
+	"CALCULATION",
+	"FORMULA_COMPARE",
+	"UPLOAD",
+	"INLINE_CHOICE",
+	"PROGRAMMING",
+	"REG_EX",
+]
+readOnly = true
+localized = true
+localizedPrefix = "item.type."
+#choiceRenderer = "itemTypeChoiceRenderer"
+defaultForSelection = true
+[metadata.ITEM_TYPE.lom]
+xpath = "qtiMetadata/interactionType"
+field = "STRING"
+sort = 500
+
+[metadata.FORMAT]
+type = "SINGLELINE"
+categories = ["TECHNICAL"]
+visible = false
+readOnly = true
+[metadata.FORMAT.lom]
+sort = 200
+
+[metadata.TOOL]
+type = "SINGLELINE"
+categories = ["TECHNICAL"]
+visible = false
+readOnly = true
+hasHeadline = true
+[metadata.TOOL.lom]
+xpath = "qtiMetadata/toolName"
+field = "STRING"
+sort = 510
+
+[metadata.VERSION]
+type = "SINGLELINE"
+categories = ["TECHNICAL"]
+visible = false
+readOnly = true
+[metadata.VERSION.lom]
+xpath = "qtiMetadata/toolVersion"
+field = "STRING"
+sort = 520
+
+[metadata.PRODUCER]
+type = "SINGLELINE"
+categories = ["TECHNICAL"]
+visible = false
+readOnly = true
+[metadata.PRODUCER.lom]
+xpath = "qtiMetadata/toolVendor"
+field = "STRING"
+sort = 530
+
+[metadata.SUBJECT]
+type = "SINGLELINE"
+categories = ["CLASSIFICATION"]
+hasDescription = true
+autoCompletion = true
+placeholder = true
+[metadata.SUBJECT.lom]
+xpath = "classification[discipline]"
+field = "TAXON"
+taxonsource = "Unknown"
+sort = 400
+
+[metadata.MODULETITLE]
+type = "SINGLELINE"
+categories = ["CLASSIFICATION"]
+hasHeadline = true
+autoCompletion = true
+[metadata.MODULETITLE.lom]
+xpath = "classification[competency]"
+field = "TAXON"
+taxonsource = "Module"
+sort = 410
+
+[metadata.MODULENUMBER]
+type = "SINGLELINE"
+categories = ["CLASSIFICATION"]
+autoCompletion = true
+
+[metadata.SKILLLEVEL]
+type = "SELECTION"
+categories = ["CLASSIFICATION"]
+values = [
+	"",
+	"skillLevel.knowledge",
+	"skillLevel.comprehension",
+	"skillLevel.application",
+	"skillLevel.analyse",
+	"skillLevel.synthesis",
+	"skillLevel.evaluation",
+]
+defaultForSelection = true
+#choiceRenderer = "defaultChoiceRenderer"
+localized = true
+[metadata.SKILLLEVEL.lom]
+xpath = "classification[educational objective]"
+field = "TAXON"
+taxonsource = "Bloom's taxonomy"
+sort = 420
+
+[metadata.DEGREE]
+type = "SINGLELINE"
+categories = ["CLASSIFICATION"]
+hasHeadline = true
+autoCompletion = true
+[metadata.DEGREE.lom]
+xpath = "classification[target audience]"
+field = "TAXON"
+taxonsource = "Unknown"
+sort = 430
+
+[metadata.LEVEL]
+type = "SINGLELINE"
+categories = ["CLASSIFICATION"]
+autoCompletion = true
+
+[metadata.DIFFICULTY]
+type = "SELECTION"
+categories = ["CLASSIFICATION"]
+values = [
+	"",
+	"difficulty.veryeasy",
+	"difficulty.easy",
+	"difficulty.medium",
+	"difficulty.difficult",
+	"difficulty.verydifficult",
+]
+defaultForSelection = true
+hasDescription = true
+#choiceRenderer = "defaultChoiceRenderer"
+localized = true
+[metadata.DIFFICULTY.lom]
+xpath = "educational/difficulty"
+field = "SOURCEVALUE"
+sort = 310
