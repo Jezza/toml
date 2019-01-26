@@ -30,8 +30,9 @@ public final class Tokens {
 	public static final int RBRACKET = 29;
 	public static final int LBRACE = 30;
 	public static final int RBRACE = 31;
-	public static final int BOOLEAN = 32;
-	public static final int DATE = 33;
+	public static final int TRUE = 32;
+	public static final int FALSE = 33;
+	public static final int DATE = 34;
 
 	private Tokens() {
 		throw new IllegalStateException();
@@ -81,8 +82,10 @@ public final class Tokens {
 				return "LBRACE";
 			case RBRACE:
 				return "RBRACE";
-			case BOOLEAN:
-				return "BOOLEAN";
+			case TRUE:
+				return "TRUE";
+			case FALSE:
+				return "FALSE";
 			case DATE:
 				return "DATE";
 			default:

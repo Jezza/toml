@@ -189,9 +189,12 @@ public final class TomlParser {
 			case Tokens.ML_STRING:
 				consume();
 				return c.value;
-			case Tokens.BOOLEAN:
+			case Tokens.TRUE:
 				consume();
-				return Boolean.parseBoolean(c.value);
+				return Boolean.TRUE;
+			case Tokens.FALSE:
+				consume();
+				return Boolean.FALSE;
 			case Tokens.LBRACKET:
 				return array();
 			case Tokens.LBRACE:

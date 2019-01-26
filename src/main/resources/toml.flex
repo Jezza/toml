@@ -49,7 +49,6 @@ NAN=[-+]?nan
 
 DATE=[0-9]{4}-[0-9]{2}-[0-9]{2}([Tt][0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?)?([Zz]|[+-][0-9]{2}:[0-9]{2})?
 
-BOOLEAN=true|false
 KEY=[0-9_\-a-zA-Z]+
 
 BASIC_STRING_CHAR = [\u0020-\u0021\u0023-\u005B\u005D-\u007E\u0080-\U10FFFF]
@@ -83,7 +82,8 @@ ML_LITERAL_STRING_CHAR = {EOL_WS} | [\u0009\u0020-\u0026\u0028-\u007E\u0080-\U10
 
   {DATE}                { return new Token(DATE, yyline, yycolumn, yytext()); }
 
-  {BOOLEAN}             { return new Token(BOOLEAN, yyline, yycolumn, yytext()); }
+  true                  { return new Token(TRUE, yyline, yycolumn, "true"); }
+  false                 { return new Token(FALSE, yyline, yycolumn, "false"); }
   {KEY}                 { return new Token(KEY, yyline, yycolumn, yytext()); }
 
   "."                   { return new Token(DOT, yyline, yycolumn, "."); }
