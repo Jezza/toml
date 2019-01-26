@@ -33,7 +33,7 @@ public final class TomlArray {
 		return array.get(index);
 	}
 
-	public void write(StringBuilder b, int indent, int increment) {
+	void write(StringBuilder b, int indent, int increment) {
 		if (array.isEmpty()) {
 			b.append("[]");
 			return;

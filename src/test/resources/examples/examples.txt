@@ -1,20 +1,32 @@
-{
+TomlTable {
+    title = "TOML Example",
     owner = {
-        dob = "1979-05-27T07:32:00Z",
-        organization = "GitHub",
         name = "Tom Preston-Werner",
+        organization = "GitHub",
         bio = "GitHub Cofounder & CEO
 Likes tater tots and beer.",
+        dob = "1979-05-27T07:32:00Z",
     },
     database = {
         server = "192.168.1.1",
-        connection_max = 5000,
         ports = [
             8001,
             8001,
             8002,
         ],
+        connection_max = 5000,
         enabled = true,
+    },
+    servers = {
+        alpha = {
+            ip = "10.0.0.1",
+            dc = "eqdc10",
+        },
+        beta = {
+            ip = "10.0.0.2",
+            dc = "eqdc10",
+            country = "中国",
+        },
     },
     clients = {
         data = [
@@ -32,27 +44,15 @@ Likes tater tots and beer.",
             "omega",
         ],
     },
-    servers = {
-        alpha = {
-            ip = "10.0.0.1",
-            dc = "eqdc10",
-        },
-        beta = {
-            country = "中国",
-            ip = "10.0.0.2",
-            dc = "eqdc10",
-        },
-    },
-    title = "TOML Example",
     products = [
         {
             name = "Hammer",
             sku = 738594937,
         },
         {
-            color = "gray",
             name = "Nail",
             sku = 284758393,
+            color = "gray",
         },
     ],
 }

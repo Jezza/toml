@@ -1,26 +1,26 @@
-{
+TomlTable {
+    key = "value",
+    bare_key = "value",
+    bare-key = "value",
+    1234 = "value",
+    127.0.0.1 = "value",
+    character encoding = "value",
+    ʎǝʞ = "value",
+    key2 = "value",
+    quoted "value" = "value",
      = "blank",
+    name = "Orange",
+    physical = {
+        color = "orange",
+        shape = "round",
+    },
+    site = {
+        google.com = true,
+    },
     a = {
         b = {
             c = 1,
         },
         d = 2,
     },
-    key2 = "value",
-    bare_key = "value",
-    ʎǝʞ = "value",
-    site = {
-        google.com = true,
-    },
-    1234 = "value",
-    quoted "value" = "value",
-    name = "Orange",
-    bare-key = "value",
-    physical = {
-        color = "orange",
-        shape = "round",
-    },
-    character encoding = "value",
-    key = "value",
-    127.0.0.1 = "value",
 }

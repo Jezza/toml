@@ -75,10 +75,9 @@ abstract class AbstractTest {
 	}
 
 	String parseToString(String file) throws IOException {
-		TomlTable table = parse(file);
-		StringBuilder b = new StringBuilder();
-		table.write(b, 2, 2);
-		return b.toString();
+		// Yeah, I know I shouldn't use a toString to verify tests...
+		// But I'm a lazy fuck...
+		return parse(file).toString();
 	}
 
 	void compareOutput(String expected, String input) throws IOException {

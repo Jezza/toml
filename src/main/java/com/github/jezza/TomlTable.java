@@ -145,7 +145,7 @@ public final class TomlTable {
 		throw new IllegalStateException("Internal Table State violated. [This shouldn't be possible. If this is thrown, contact author.]");
 	}
 
-	public void write(StringBuilder b, int indent, int increment) {
+	void write(StringBuilder b, int indent, int increment) {
 		b.append("{\n");
 
 		for (Entry<String, Object> entry : table.entrySet()) {
