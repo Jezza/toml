@@ -2,10 +2,8 @@ package com.github.jezza;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.io.Reader;
 import java.util.List;
-import java.util.function.Supplier;
 
 import com.github.jezza.lang.TomlParser;
 
@@ -17,34 +15,42 @@ public final class Toml {
 		throw new IllegalStateException();
 	}
 
-	public static void main(String[] args) throws Exception {
-		TomlTable table = from(Toml.class.getResourceAsStream("/overload.toml"));
-		System.out.println(table);
+	public static TomlTable from(InputStream input) throws IOException {
+		return new TomlParser(input).parse();
 	}
 
-	public static void main0(String[] args) throws Exception {
-		TomlTable table = from(List.of(
-				() -> Toml.class.getResourceAsStream("/first.toml"),
-				() -> Toml.class.getResourceAsStream("/second.toml")
-		));
-
-		System.out.println(table);
+	public static TomlTable from(Reader input) throws IOException {
+		return new TomlParser(input).parse();
 	}
 
-	public static TomlTable from(InputStream in) throws IOException {
+	public static TomlTable into(InputStream input, TomlTable table) throws IOException {
+		return new TomlParser(input).parse(table);
+	}
+
+	public static TomlTable into(Reader input, TomlTable table) throws IOException {
+		return new TomlParser(input).parse(table);
+	}
+
+	public static TomlTable from(Reader... inputs) throws IOException {
+		return fromReaders(List.of(inputs));
+	}
+
+	public static TomlTable fromReaders(Iterable<? extends Reader> it) throws IOException {
 		TomlTable table = new TomlTable();
-		TomlParser parser = new TomlParser(new InputStreamReader(in, StandardCharsets.UTF_8));
-		parser.parse(table);
+		for (Reader reader : it) {
+			into(reader, table);
+		}
 		return table;
 	}
 
-	public static TomlTable from(Iterable<? extends Supplier<? extends InputStream>> it) throws IOException {
+	public static TomlTable from(InputStream... inputs) throws IOException {
+		return fromInputStreams(List.of(inputs));
+	}
+
+	public static TomlTable fromInputStreams(Iterable<? extends InputStream> it) throws IOException {
 		TomlTable table = new TomlTable();
-		for (Supplier<? extends InputStream> supplier : it) {
-			try (InputStream in = supplier.get()) {
-				TomlParser parser = new TomlParser(new InputStreamReader(in, StandardCharsets.UTF_8));
-				parser.parse(table);
-			}
+		for (InputStream in : it) {
+			into(in, table);
 		}
 		return table;
 	}

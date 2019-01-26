@@ -32,7 +32,11 @@ public final class Tokens {
 	public static final int RBRACE = 31;
 	public static final int TRUE = 32;
 	public static final int FALSE = 33;
-	public static final int DATE = 34;
+
+	public static final int OFFSET_DATE_TIME = 34;
+	public static final int LOCAL_DATE_TIME = 35;
+	public static final int LOCAL_DATE = 36;
+	public static final int LOCAL_TIME = 37;
 
 	private Tokens() {
 		throw new IllegalStateException();
@@ -86,8 +90,14 @@ public final class Tokens {
 				return "TRUE";
 			case FALSE:
 				return "FALSE";
-			case DATE:
-				return "DATE";
+			case OFFSET_DATE_TIME:
+				return "OFFSET_DATE_TIME";
+			case LOCAL_DATE_TIME:
+				return "LOCAL_DATE_TIME";
+			case LOCAL_DATE:
+				return "LOCAL_DATE";
+			case LOCAL_TIME:
+				return "LOCAL_TIME";
 			default:
 				return "<unknown>";
 		}

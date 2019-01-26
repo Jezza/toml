@@ -1,0 +1,12 @@
+origin = "first"
+untouched = "first"
+
+[metadata.a]
+name = "first-a"
+values = [ "first-0", "first-1", "first-2" ]
+untouched = "first"
+
+[metadata.b]
+name = "first-b"
+values = [ "first-0", "first-1" ]
+untouched = "first"

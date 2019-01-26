@@ -31,6 +31,10 @@ abstract class AbstractTest {
 		return new _TomlLexer(reader(file));
 	}
 
+	TomlTable table(String file) throws IOException {
+		return new TomlParser(reader(file)).parse();
+	}
+
 	static Token slurp(String input) {
 		_TomlLexer lexer = new _TomlLexer(input);
 		try {

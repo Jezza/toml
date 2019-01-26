@@ -1,9 +1,13 @@
 package com.github.jezza.lang;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 
 import com.github.jezza.TomlArray;
@@ -13,7 +17,7 @@ import com.github.jezza.util.Strings;
 /**
  * @author Jezza
  */
-public final class TomlParser {
+public class TomlParser {
 	private final _TomlLexer lexer;
 
 	private Token current;
@@ -22,17 +26,21 @@ public final class TomlParser {
 		this(new StringReader(in));
 	}
 
+	public TomlParser(InputStream in) {
+		this(new InputStreamReader(in, StandardCharsets.UTF_8));
+	}
+
 	public TomlParser(Reader in) {
 		lexer = new _TomlLexer(in);
 	}
 
-	private Token current() throws IOException {
+	protected final Token current() throws IOException {
 		return current != null
 				? current
 				: (current = lexer.next());
 	}
 
-	private boolean match(int type) throws IOException {
+	protected final boolean match(int type) throws IOException {
 		boolean match = current().type == type;
 		if (match) {
 			current = null;
@@ -40,15 +48,15 @@ public final class TomlParser {
 		return match;
 	}
 
-	private boolean is(int type) throws IOException {
+	protected final boolean is(int type) throws IOException {
 		return current().type == type;
 	}
 
-	private boolean not(int type) throws IOException {
+	protected final boolean not(int type) throws IOException {
 		return current().type != type;
 	}
 
-	private Token consume() throws IOException {
+	protected final Token consume() throws IOException {
 		if (current == null) {
 			return lexer.next();
 		}
@@ -57,16 +65,16 @@ public final class TomlParser {
 		return current;
 	}
 
-	private Token consume(int type) throws IOException {
+	protected final Token consume(int type) throws IOException {
 		Token token = current();
 		if (token.type == type) {
 			current = null;
 			return token;
 		}
-		throw new RuntimeException(Strings.format2("Unexpected token: {}, expected {}.", token, Tokens.name(type)));
+		throw new RuntimeException(Strings.format("Unexpected token: {}, expected {}.", token, Tokens.name(type)));
 	}
 
-	public TomlTable parse() throws IOException {
+	public final TomlTable parse() throws IOException {
 		TomlTable table = new TomlTable();
 		parse(table);
 		return table;
@@ -86,7 +94,7 @@ public final class TomlParser {
 				if (array) {
 //					System.out.println(key + " => array-table");
 					consume(Tokens.RBRACKET);
-					Object value = root.computeIfAbsent(key, k -> new TomlArray());
+					Object value = root.computeIfAbsent(key, k -> new TomlArray(0));
 					if (!(value instanceof TomlArray)) {
 						throw new IllegalStateException("Attempted to redefine object as array. (" + key + " => " + value + ')');
 					}
@@ -114,9 +122,9 @@ public final class TomlParser {
 		return root;
 	}
 
-	public TomlArray array() throws IOException {
+	protected TomlArray array() throws IOException {
 		consume(Tokens.LBRACKET);
-		TomlArray array = new TomlArray();
+		TomlArray array = new TomlArray(0);
 		while (!match(Tokens.RBRACKET)) {
 			array.add(value());
 			if (!match(Tokens.COMMA)) {
@@ -127,7 +135,7 @@ public final class TomlParser {
 		return array;
 	}
 
-	public TomlTable inlineTable() throws IOException {
+	protected TomlTable inlineTable() throws IOException {
 		int row = consume(Tokens.LBRACE).row;
 		TomlTable table = new TomlTable();
 		if (is(Tokens.RBRACE)) {
@@ -156,13 +164,14 @@ public final class TomlParser {
 		return table;
 	}
 
-	public List<String> key() throws IOException {
+	protected List<String> key() throws IOException {
 		// It assumes you've already checked the token...
-		List<String> key = new ArrayList<>(1);
 		Token t = consume();
 		int row = t.row;
 		assert t.type == Tokens.KEY || t.type == Tokens.STRING || t.type == Tokens.INTEGER_DEC;
-		key.add(t.value);
+		String[] segments = {
+				t.value
+		};
 		while (current().type == Tokens.DOT) {
 			if (consume().row != row) {
 				throw new IllegalStateException("[ERROR] Dotted key not on same line: " + row);
@@ -174,12 +183,14 @@ public final class TomlParser {
 			if (consume().row != row) {
 				throw new IllegalStateException("[ERROR] Dotted key not on same line: " + row);
 			}
-			key.add(next.value);
+			int length = segments.length;
+			segments = Arrays.copyOf(segments, length + 1);
+			segments[length] = next.value;
 		}
-		return key;
+		return List.of(segments);
 	}
 
-	public Object value() throws IOException {
+	protected Object value() throws IOException {
 		Token c = current();
 		switch (c.type) {
 			case Tokens.STRING_POISON:
@@ -199,10 +210,22 @@ public final class TomlParser {
 				return array();
 			case Tokens.LBRACE:
 				return inlineTable();
-			case Tokens.DATE:
+			case Tokens.OFFSET_DATE_TIME:
 				consume();
-				// @TODO Jezza - 26 Jan. 2019: I should probably do this... At some point...
-				return c.value;
+				// @TODO Jezza - 26 Jan. 2019: I wonder if I need to build my own formatter...
+				//  (The default formatter doesn't support the optional space in the place of a T)
+				return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(c.value.replace(' ', 'T'));
+			case Tokens.LOCAL_DATE_TIME:
+				consume();
+				// @TODO Jezza - 26 Jan. 2019: I wonder if I need to build my own formatter...
+				//  (The default formatter doesn't support the optional space in the place of a T)
+				return DateTimeFormatter.ISO_LOCAL_DATE_TIME.parse(c.value.replace(' ', 'T'));
+			case Tokens.LOCAL_DATE:
+				consume();
+				return DateTimeFormatter.ISO_LOCAL_DATE.parse(c.value);
+			case Tokens.LOCAL_TIME:
+				consume();
+				return DateTimeFormatter.ISO_LOCAL_TIME.parse(c.value);
 			case Tokens.INF:
 				consume();
 				return c.value.charAt(0) == '-'
@@ -232,14 +255,16 @@ public final class TomlParser {
 		}
 	}
 
-	private static Long intoLong(Token token, int offset, int radix) {
+	protected static Long intoLong(Token token, int offset, int radix) {
+		// @TODO Jezza - 26 Jan. 2019: I should build up the correct number in the lexer... (Without '_')
 		String input = token.value.replace("_", "");
 		return Long.parseLong(offset > 0
 				? input.substring(offset)
 				: input, radix);
 	}
 
-	private static Double intoDouble(Token token) {
+	protected static Double intoDouble(Token token) {
+		// @TODO Jezza - 26 Jan. 2019: I should build up the correct number in the lexer... (Without '_')
 		String input = token.value.replace("_", "");
 		return Double.parseDouble(input);
 	}

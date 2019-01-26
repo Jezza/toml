@@ -1,0 +1,6 @@
+origin = "second"
+
+[metadata.a]
+name = "second-a"
+values = [ "second-4" ]
+new = "second"

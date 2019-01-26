@@ -47,7 +47,14 @@ FLOAT=[-+]?{INTEGER_DEC}(\.{INTEGER_DEC_SQ})?([eE]{INTEGER_DEC})?
 INF=[-+]?inf
 NAN=[-+]?nan
 
-DATE=[0-9]{4}-[0-9]{2}-[0-9]{2}([Tt][0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?)?([Zz]|[+-][0-9]{2}:[0-9]{2})?
+FULL_DATE = [0-9]{4}-[0-9]{2}-[0-9]{2}
+PARTIAL_TIME = [0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?
+FULL_TIME = {PARTIAL_TIME}([Zz]|[+-][0-9]{2}:[0-9]{2})
+
+OFFSET_DATE_TIME={FULL_DATE}[Tt ]{FULL_TIME}    /* full-date time-delim full-time      */
+LOCAL_DATE_TIME={FULL_DATE}[Tt ]{PARTIAL_TIME}  /* full-date time-delim partial-time   */
+LOCAL_DATE={FULL_DATE}                         /* full-date                           */
+LOCAL_TIME={PARTIAL_TIME}                      /* partial-time                        */
 
 KEY=[0-9_\-a-zA-Z]+
 
@@ -80,7 +87,10 @@ ML_LITERAL_STRING_CHAR = {EOL_WS} | [\u0009\u0020-\u0026\u0028-\u007E\u0080-\U10
   {INF}                 { return new Token(INF, yyline, yycolumn, yytext()); }
   {NAN}                 { return new Token(NAN, yyline, yycolumn, yytext()); }
 
-  {DATE}                { return new Token(DATE, yyline, yycolumn, yytext()); }
+  {OFFSET_DATE_TIME}    { return new Token(OFFSET_DATE_TIME, yyline, yycolumn, yytext()); }
+  {LOCAL_DATE_TIME}     { return new Token(LOCAL_DATE_TIME, yyline, yycolumn, yytext()); }
+  {LOCAL_DATE}          { return new Token(LOCAL_DATE, yyline, yycolumn, yytext()); }
+  {LOCAL_TIME}          { return new Token(LOCAL_TIME, yyline, yycolumn, yytext()); }
 
   true                  { return new Token(TRUE, yyline, yycolumn, "true"); }
   false                 { return new Token(FALSE, yyline, yycolumn, "false"); }

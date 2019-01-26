@@ -1,17 +1,27 @@
 package com.github.jezza;
 
+import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalQueries;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import com.github.jezza.util.Strings;
+
 /**
+ * The only types that can be stored in this table are:
+ * <p>
+ * Boolean | Double | Long | String | TomlArray | TomlTable | TemporalAccessor
+ * <p>
+ * Attempting to store anything else is undefined behaviour... (Although, chances are nothing different will happen...)
+ *
  * @author Jezza
  */
 public final class TomlTable {
@@ -22,9 +32,13 @@ public final class TomlTable {
 	}
 
 	public TomlTable(Map<String, Object> table) {
-		this.table = table;
+		this.table = Objects.requireNonNull(table);
 	}
 
+	public Map<String, Object> asMap() {
+		return table;
+	}
+	
 	public boolean isEmpty() {
 		return table.isEmpty();
 	}
@@ -33,73 +47,112 @@ public final class TomlTable {
 		return table.size();
 	}
 
-	public boolean containsKey(List<String> key) {
-		return locate(false, key, (t, k) -> t.table.containsKey(k));
+	public boolean containsKey(Iterable<String> key) {
+		Boolean result = locate(false, key, (t, k) -> t.table.containsKey(k));
+		return result != null && result;
 	}
 
-//	@Override
-//	public boolean containsValue(Object value) {
-//		// @TODO Jezza - 26 Jan. 2019: I'm too fucking lazy to implement this right now...
-//		throw new UnsupportedOperationException();
-//	}
+	public Object get(String key) {
+		return get(Strings.split(key));
+	}
 
-	public Object get(List<String> key) {
+	public Object get(Iterable<String> key) {
 		return locate(false, key, (t, k) -> t.table.get(k));
 	}
 
-	public Object put(List<String> key, Object value) {
+	public Object put(String key, Object value) {
+		return put(Strings.split(key), value);
+	}
+
+	public Object put(Iterable<String> key, Object value) {
 		return locate(true, key, (table, k) -> table.table.put(k, value));
 	}
 
-	public Object remove(List<String> key) {
+	public Object remove(String key) {
+		return remove(Strings.split(key));
+	}
+
+	public Object remove(Iterable<String> key) {
 		return locate(false, key, (t, k) -> t.table.remove(k));
 	}
 
-	public Object getOrDefault(Object key, Object defaultValue) {
-		return null;
+	public Object getOrDefault(String key, Object defaultValue) {
+		return getOrDefault(Strings.split(key), defaultValue);
 	}
 
-	public void forEach(BiConsumer<? super List<String>, ? super Object> action) {
-
+	public Object getOrDefault(Iterable<String> key, Object defaultValue) {
+		Object value = get(key);
+		return value != null
+				? value
+				: defaultValue;
 	}
 
-	public void replaceAll(BiFunction<? super List<String>, ? super Object, ?> function) {
-
+	public void forEach(BiConsumer<? super String, ? super Object> action) {
+		table.forEach(action);
 	}
 
-	public Object putIfAbsent(List<String> key, Object value) {
-		return null;
+	public void replaceAll(BiFunction<? super String, ? super Object, ?> function) {
+		table.replaceAll(function);
 	}
 
-	public boolean remove(Object key, Object value) {
-		return false;
+	public Object putIfAbsent(String key, Object value) {
+		return putIfAbsent(Strings.split(key), value);
 	}
 
-	public boolean replace(List<String> key, Object oldValue, Object newValue) {
-		return false;
+	public Object putIfAbsent(Iterable<String> key, Object value) {
+		return locate(true, key, (t, k) -> t.table.putIfAbsent(k, value));
 	}
 
-	public Object replace(List<String> key, Object value) {
-		return null;
+	public Object replace(String key, Object value) {
+		return replace(Strings.split(key), value);
 	}
 
-	public Object computeIfAbsent(List<String> key, Function<? super String, ?> mappingFunction) {
+	public Object replace(Iterable<String> key, Object value) {
+		return locate(false, key, (t, k) -> t.table.replace(k, value));
+	}
+
+	public boolean replace(String key, Object oldValue, Object newValue) {
+		return replace(Strings.split(key), oldValue, newValue);
+	}
+
+	public boolean replace(Iterable<String> key, Object oldValue, Object newValue) {
+		Boolean locate = locate(false, key, (t, k) -> t.table.replace(k, oldValue, newValue));
+		return locate != null && locate;
+	}
+
+	public Object computeIfAbsent(String key, Function<? super String, ?> mappingFunction) {
+		return computeIfAbsent(Strings.split(key), mappingFunction);
+	}
+
+	public Object computeIfAbsent(Iterable<String> key, Function<? super String, ?> mappingFunction) {
 		return locate(true, key, (t, k) -> t.table.computeIfAbsent(k, mappingFunction));
 	}
 
-	public Object computeIfPresent(List<String> key, BiFunction<? super List<String>, ? super Object, ?> remappingFunction) {
-		return null;
+	public Object computeIfPresent(String key, BiFunction<? super String, ? super Object, ?> remappingFunction) {
+		return computeIfPresent(Strings.split(key), remappingFunction);
 	}
 
-	public Object compute(List<String> key, BiFunction<? super List<String>, ? super Object, ?> remappingFunction) {
-		return null;
+	public Object computeIfPresent(Iterable<String> key, BiFunction<? super String, ? super Object, ?> remappingFunction) {
+		return locate(true, key, (t, k) -> t.table.computeIfPresent(k, remappingFunction));
 	}
 
-	public Object merge(List<String> key, Object value, BiFunction<? super Object, ? super Object, ?> remappingFunction) {
-		return null;
+	public Object compute(String key, BiFunction<? super String, ? super Object, ?> remappingFunction) {
+		return compute(Strings.split(key), remappingFunction);
 	}
 
-	public void putAll(Map<? extends List<String>, ?> m) {
+	public Object compute(Iterable<String> key, BiFunction<? super String, ? super Object, ?> remappingFunction) {
+		return locate(true, key, (t, k) -> t.table.compute(k, remappingFunction));
+	}
+
+	public Object merge(String key, Object value, BiFunction<? super Object, ? super Object, ?> remappingFunction) {
+		return merge(Strings.split(key), value, remappingFunction);
+	}
+
+	public Object merge(Iterable<String> key, Object value, BiFunction<? super Object, ? super Object, ?> remappingFunction) {
+		return locate(true, key, (t, k) -> t.table.merge(k, value, remappingFunction));
+	}
+
+	public void putAll(TomlTable table) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -107,33 +160,38 @@ public final class TomlTable {
 		table.clear();
 	}
 
-	public Set<List<String>> keySet() {
-		throw new UnsupportedOperationException();
+	public Set<String> keySet() {
+		return table.keySet();
 	}
 
 	public Collection<Object> values() {
-		throw new UnsupportedOperationException();
+		return table.values();
 	}
 
-//	public Set<Entry<List<String>, Object>> entrySet() {
-//		throw new UnsupportedOperationException();
-//	}
+	public Set<Entry<String, Object>> entrySet() {
+		return table.entrySet();
+	}
 
-	private <T> T locate(boolean create, List<String> key, BiFunction<? super TomlTable, ? super String, T> action) {
-		if (key.isEmpty()) {
+	private <T> T locate(boolean create, Iterable<String> key, BiFunction<? super TomlTable, ? super String, T> action) {
+		Iterator<String> it = key.iterator();
+		if (!it.hasNext()) {
 			throw new IllegalStateException("No key given...");
 		}
 		TomlTable table = this;
-		Iterator<String> it = key.iterator();
-		while (it.hasNext()) {
+		do {
 			String s = it.next();
 			if (!it.hasNext()) {
 				return action.apply(table, s);
 			}
-			if (!create) {
-				return null;
+			Object current;
+			if (create) {
+				current = table.table.computeIfAbsent(s, k -> new TomlTable());
+			} else {
+				current = table.table.get(s);
+				if (current == null) {
+					return null;
+				}
 			}
-			Object current = table.table.computeIfAbsent(s, k -> new TomlTable());
 			if (current instanceof TomlArray) {
 				current = ((TomlArray) current).get(((TomlArray) current).size() - 1);
 			}
@@ -141,8 +199,7 @@ public final class TomlTable {
 				throw new IllegalStateException("Cannot insert into a non-table value: " + key + ":[" + s + "] => " + current.getClass());
 			}
 			table = (TomlTable) current;
-		}
-		throw new IllegalStateException("Internal Table State violated. [This shouldn't be possible. If this is thrown, contact author.]");
+		} while (true); // This is basically `it.hasNext()`, but no point checking it again...
 	}
 
 	void write(StringBuilder b, int indent, int increment) {
@@ -155,6 +212,13 @@ public final class TomlTable {
 				((TomlTable) value).write(b, indent + increment, increment);
 			} else if (value instanceof TomlArray) {
 				((TomlArray) value).write(b, indent + increment, increment);
+			} else if (value instanceof TemporalAccessor) {
+				TemporalAccessor accessor = (TemporalAccessor) value;
+				b.append(accessor.query(TemporalQueries.chronology()))
+						.append(':').append(accessor.query(TemporalQueries.localDate()))
+						.append(':').append(accessor.query(TemporalQueries.localTime()))
+						.append(':').append(accessor.query(TemporalQueries.precision()))
+						.append(':').append(accessor.query(TemporalQueries.zone()));
 			} else if (value instanceof String) {
 				b.append('"').append(value).append('"');
 			} else {
@@ -174,5 +238,23 @@ public final class TomlTable {
 		StringBuilder b = new StringBuilder("TomlTable ");
 		write(b, 2, 2);
 		return b.toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+
+		TomlTable other = (TomlTable) o;
+		return table.equals(other.table);
+	}
+
+	@Override
+	public int hashCode() {
+		return table.hashCode();
 	}
 }

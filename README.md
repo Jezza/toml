@@ -1,58 +1,55 @@
-I'm writing this at 3am, so this is going to be coherent...
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.jezza/toml/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.jezza/toml)
 
-*Features:*
+Usage
+---
+
+```java
+// table is basically just a HashMap. Has all of the same methods, etc...
+TomlTable table = Toml.from(new StringReader("key = \"value\""));
+```
+
+Features:
+---
 
  * TOML 0.5 "compliant"
  * Fast
  * Memory Efficient
+ * Zero dependencies
+ * Simple inheritance
  * Other buzzwords
- * Simple inheritance model (seriously though...)
 
-*This library:*
+---
 
-It's a library that "fully" implements the TOML 0.5 spec.
-I say "fully", because I have no doubt that I've just completely ignored it in some areas...
+The main goals are simple.  
+Remain fast and lightweight.
 
-For the most part, it should follow along close enough.
+This library has no dependencies. (Save JUnit for tests, and JFlex at compile-time)
 
-Oh, I think you can currently declare duplicate keys...
-So, I'll probably have to fix that.
-Maybe a strict mode and have it on by default.
-Yeah, I think that'll be a good idea.
+The API should be easy enough to use.
 
-That way we don't get a bunch of idiots, myself included, complaining that TOML isn't secure
-because you can override keys...
-I don't know how that's a security issue, but I have no doubt that someone somewhere will make it one...
+I had to make some decisions that might make it a bit annoying to work with.
 
-*The idea behind the library:*
+For example (As of writing):
 
-Basically, the thing that drove me to write this library was, all of the current libraries are not very efficient
-and require entire language runtimes so that they can parse the thing.
-Having actually looked at the toml spec before, I knew that it wasn't difficult, so I thought, why not.
+`TomlTable` and `TomlArray` don't provide any help towards the objects you can pull out of them.
 
-The idea was to make a library that was fast, efficient, and requires no runtimes.
+The javadoc elaborates a bit more, but the types you can pull out are:
+Boolean | Double | Long | String | TomlArray | TomlTable | TemporalAccessor
 
-I only use JFlex for the lexer because I've never used it, and I wanted to try it out...
-I wish I had a better reason...
-I've written a ton of lexers by hand, and after spending far too long trying to work out this new fancy syntax, I 
-can honestly say "ehh".
+Misc
+---
 
-I spent a lot of time dealing with weird things that it did.
-Each time was because of an error on my half, but still, it didn't help.
+The actual implementation is really simple.
+The only classes most people will care about is:
+`Toml`, `TomlTable`, `TomlArray`.
 
-*Current Status:*
+`Toml` can be used to quickly read a TomlTable from a `Reader` or `InputStream`.
 
-This is still a WIP.
-The library itself is fully functional.
-It's not the best to use, but that's the next goal.
-Quality of Life.
+Whereas `TomlTable` and `TomlArray` are data structures.
+`TomlArray` is just an ArrayList, nothing special.
 
-I'll be making the API easier to use in the coming days/weeks/months.
+`TomlTable` is a `LinkedHashMap`, but with a couple of tricks surrounding keys.
+It also has a method to convert it to a map.
 
-*A quick note about inheritance:*
-
-So, interestingly, this library does support toml inheritance.
-When you parse the TOML, you have the option to give it a base/root.
-If you give it the result from a previous file, then boom, you've got inheritance.
-
-It overwrites the values from the first with the values from the second.
+Side-note: I've exported the `lang` package too, so if you want to take control of the parsing,
+you're more than welcome to.

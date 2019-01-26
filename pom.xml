@@ -4,11 +4,44 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
+	<name>Toml</name>
+	<packaging>jar</packaging>
+	<description>A Toml library. Written to be fast and easy to use.</description>
+	<url>https://github.com/Jezza/toml</url>
+
+	<scm>
+		<url>https://github.com/Jezza/toml</url>
+		<connection>scm:git:git://github.com/Jezza/toml.git</connection>
+		<developerConnection>scm:git:git@github.com:Jezza/toml.git</developerConnection>
+	</scm>
+
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>http://www.opensource.org/licenses/mit-license.php</url>
+		</license>
+	</licenses>
+
+	<issueManagement>
+		<url>https://github.com/Jezza/toml/issues</url>
+		<system>GitHub Issues</system>
+	</issueManagement>
+
+	<developers>
+		<developer>
+			<email>jeremy.a.barrow@gmail.com</email>
+			<name>Jeremy Barrow</name>
+			<url>https://github.com/Jezza</url>
+			<id>jezza</id>
+		</developer>
+	</developers>
+
 	<groupId>com.github.jezza</groupId>
 	<artifactId>toml</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0</version>
 
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 	</properties>
@@ -21,6 +54,17 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
 
 	<build>
 		<plugins>
@@ -39,6 +83,49 @@
 								<lexDefinition>src/main/resources/toml.flex</lexDefinition>
 							</lexDefinitions>
 						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
