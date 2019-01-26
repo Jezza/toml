@@ -187,7 +187,7 @@ public class TomlParser {
 			segments = Arrays.copyOf(segments, length + 1);
 			segments[length] = next.value;
 		}
-		return List.of(segments);
+		return Arrays.asList(segments);
 	}
 
 	protected Object value() throws IOException {
