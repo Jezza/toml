@@ -9,6 +9,10 @@
 	<description>A Toml library. Written to be fast and easy to use.</description>
 	<url>https://github.com/Jezza/toml</url>
 
+	<groupId>com.github.jezza</groupId>
+	<artifactId>toml</artifactId>
+	<version>1.1</version>
+
 	<scm>
 		<url>https://github.com/Jezza/toml</url>
 		<connection>scm:git:git://github.com/Jezza/toml.git</connection>
@@ -35,10 +39,6 @@
 			<id>jezza</id>
 		</developer>
 	</developers>
-
-	<groupId>com.github.jezza</groupId>
-	<artifactId>toml</artifactId>
-	<version>1.0</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
