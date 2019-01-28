@@ -8,8 +8,8 @@ public final class Tokens {
 	public static final int BAD_CHARACTER = 0;
 
 	public static final int STRING = 3;
-	public static final int ML_STRING = 4;
-	public static final int STRING_POISON = 5;
+	public static final int STRING_POISON = 4;
+	public static final int ML_STRING = 5;
 	public static final int ML_STRING_POISON = 6;
 
 	public static final int INTEGER_DEC = 10;

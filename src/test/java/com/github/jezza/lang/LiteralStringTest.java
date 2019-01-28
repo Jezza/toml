@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
  */
 final class LiteralStringTest extends AbstractTest {
 	@Test
-	void simple(){
+	void simple() throws IOException {
 		test("value", "'value'");
 		test("val\"\"ue0", "'val\"\"ue0'");
 		test("\\", "'\\'");
@@ -21,13 +21,16 @@ final class LiteralStringTest extends AbstractTest {
 
 	@Test
 	void linebreak_poison() throws IOException {
-		Token token = slurp("'value\nloop'");
+		_TomlLexer lexer = lex("'value\nloop'");
+		Token token = lexer.next();
 		assertEquals(Tokens.STRING_POISON, token.type, "Token isn't a poison string");
+		assertEquals(Tokens.KEY, lexer.next().type, "Failed to read next token. [Expected a key, as it's a poisoned string]");
+		assertEquals(Tokens.EOS, lexer.next().type, "Failed to consume all input");
 	}
 
 	@Test
 	void multiline() throws IOException {
-		_TomlLexer lexer = lexer("/strings/literal/mutliline.toml");
+		_TomlLexer lexer = lexFile("/strings/literal/mutliline.toml");
 		{
 			Token next = lexer.next();
 			assertTrue(next.type == Tokens.STRING || next.type == Tokens.ML_STRING, "Failed to parse string.");
@@ -45,7 +48,7 @@ final class LiteralStringTest extends AbstractTest {
 
 	@Test
 	void singleline() throws IOException {
-		_TomlLexer lexer = lexer("/strings/literal/singleline.toml");
+		_TomlLexer lexer = lexFile("/strings/literal/singleline.toml");
 		{
 			Token next = lexer.next();
 			assertEquals(Tokens.STRING, next.type);

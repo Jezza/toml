@@ -18,6 +18,8 @@ import com.github.jezza.util.Strings;
  * @author Jezza
  */
 public class TomlParser {
+	// If you're reading the source code, and have absolutely no idea where this _TomlLexer comes from,
+	// It's generated from "src/main/resources/toml.flex" during compile time.
 	private final _TomlLexer lexer;
 
 	private Token current;

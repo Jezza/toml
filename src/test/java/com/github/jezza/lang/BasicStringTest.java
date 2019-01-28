@@ -11,29 +11,31 @@ import org.junit.jupiter.api.Test;
  * @author Jezza
  */
 final class BasicStringTest extends AbstractTest {
-
 	@Test
-	void basic() {
+	void basic() throws IOException {
 		test("value", "\"value\"");
 		test("value\nreturn", "\"value\\nreturn\"");
 	}
 
 	@Test
-	void unicode4() {
+	void unicode4() throws IOException {
 		test("Here: \u0000", "\"Here: \\u0000\"");
 		test("Here: \u9900", "\"Here: \\u9900\"");
 		test("Here: \u0901", "\"Here: \\u0901\"");
 	}
 
 	@Test
-	void unicode8() {
+	void unicode8() throws IOException {
 		test("Here: \udbff\udfff", "\"Here: \\U0010FFFF\"");
 	}
 
 	@Test
-	void linebreak_poison() {
-		Token token = slurp("\"value\nloop\"");
+	void linebreak_poison() throws IOException {
+		_TomlLexer lexer = lex("\"value\nloop\"");
+		Token token = lexer.next();
 		assertEquals(Tokens.STRING_POISON, token.type, "Token isn't a poison string");
+		assertEquals(Tokens.KEY, lexer.next().type, "Failed to read next token. [Expected a key, as it's a poisoned string]");
+		assertEquals(Tokens.EOS, lexer.next().type, "Failed to consume all input");
 	}
 
 	@Test
@@ -44,7 +46,7 @@ final class BasicStringTest extends AbstractTest {
 	}
 
 	@Test
-	void empty() {
+	void empty() throws IOException {
 		test("", "\"\"\"\"\"\"");
 	}
 
@@ -63,7 +65,7 @@ final class BasicStringTest extends AbstractTest {
 	}
 
 	@Test
-	void escape() {
+	void escape() throws IOException {
 		test("\u0000\u0090\u0109\n\udbff\udfff", "\"\"\"" +
 				"\\u0000" +
 				"\\u0090" +
@@ -74,7 +76,7 @@ final class BasicStringTest extends AbstractTest {
 
 	@Test
 	void quote() throws IOException {
-		_TomlLexer lexer = lexer("/strings/basic/multiline/quote.toml");
+		_TomlLexer lexer = lexFile("/strings/basic/multiline/quote.toml");
 		{
 			Token next = lexer.next();
 			assertTrue(next.type == Tokens.STRING || next.type == Tokens.ML_STRING, "Failed to parse string");

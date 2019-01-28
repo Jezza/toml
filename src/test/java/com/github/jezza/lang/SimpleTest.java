@@ -22,8 +22,7 @@ final class SimpleTest extends AbstractTest {
 
 	@Test
 	void dates() throws IOException {
-		TomlTable table = table("/dates.toml");
-		System.out.println(table);
+		TomlTable table = parseFile("/dates.toml");
 
 		OffsetDateTime.from((TemporalAccessor) table.get("odt1"));
 		OffsetDateTime.from((TemporalAccessor) table.get("odt2"));

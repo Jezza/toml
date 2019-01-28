@@ -8,7 +8,6 @@ import java.io.StringReader;
 
 %{
 	private final StringBuilder string = new StringBuilder(32);
-	private boolean poisoned = false;
 
 	public _TomlLexer(String in) {
 		this(new StringReader(in));
@@ -71,10 +70,10 @@ ML_LITERAL_STRING_CHAR = {EOL_WS} | [\u0009\u0020-\u0026\u0028-\u007E\u0080-\U10
   {EOL_WS}+             {}
   {COMMENT}             {}
 
-  \"                    { string.setLength(0); poisoned = false; yybegin(S_BASIC_STRING); }
+  \"                    { string.setLength(0); yybegin(S_BASIC_STRING); }
   \"\"\"{EOL}           { string.setLength(0); yybegin(S_ML_BASIC_STRING); }
   \"\"\"                { string.setLength(0); yybegin(S_ML_BASIC_STRING); }
-  '                     { string.setLength(0); poisoned = false; yybegin(S_LITERAL_STRING); }
+  '                     { string.setLength(0); yybegin(S_LITERAL_STRING); }
   '''{EOL}              { string.setLength(0); yybegin(S_ML_LITERAL_STRING); }
   '''                   { string.setLength(0); yybegin(S_ML_LITERAL_STRING); }
 
@@ -109,7 +108,7 @@ ML_LITERAL_STRING_CHAR = {EOL_WS} | [\u0009\u0020-\u0026\u0028-\u007E\u0080-\U10
 
 <S_BASIC_STRING> {
   \"                   { yybegin(YYINITIAL);
-                         return new Token(poisoned ? STRING_POISON : STRING, yyline, yycolumn, string.toString()); }
+                         return new Token(STRING, yyline, yycolumn, string.toString()); }
 
   {BASIC_STRING_CHAR}+ { string.append(yytext()); }
 
@@ -123,7 +122,8 @@ ML_LITERAL_STRING_CHAR = {EOL_WS} | [\u0009\u0020-\u0026\u0028-\u007E\u0080-\U10
   \\u[0-9A-Fa-f]{4}    { string.append((char) Integer.parseInt(yytext().substring(2), 16)); }
   \\U[0-9A-Fa-f]{8}    { string.append(Character.toChars(Integer.parseInt(yytext().substring(2), 16))); }
 
-  [^]                  { poisoned = true;}
+  [^]                  { yybegin(YYINITIAL);
+						 return new Token(STRING_POISON, yyline, yycolumn, string.toString());}
 }
 
 <S_ML_BASIC_STRING> {
@@ -149,21 +149,23 @@ ML_LITERAL_STRING_CHAR = {EOL_WS} | [\u0009\u0020-\u0026\u0028-\u007E\u0080-\U10
 
 <S_LITERAL_STRING> {
 	'                        { yybegin(YYINITIAL);
-                               return new Token(poisoned ? STRING_POISON : STRING, yyline, yycolumn, string.toString()); }
+                               return new Token(STRING, yyline, yycolumn, string.toString()); }
 
     {LITERAL_STRING_CHAR}+   { string.append(yytext()); }
 
-    [^]                      { poisoned = true;}
+    [^]                      { yybegin(YYINITIAL);
+                               return new Token(STRING_POISON, yyline, yycolumn, string.toString()); }
 }
 
 <S_ML_LITERAL_STRING> {
 	'''                         { yybegin(YYINITIAL);
-                                  return new Token(poisoned ? ML_STRING_POISON : ML_STRING, yyline, yycolumn, string.toString()); }
+                                  return new Token(ML_STRING, yyline, yycolumn, string.toString()); }
 
 	{ML_LITERAL_STRING_CHAR}+   { string.append(yytext()); }
 
 	''                          { string.append("''"); }
 	'                           { string.append('\''); }
 
-	[^]                         { poisoned = true; }
+	[^]                         { yybegin(YYINITIAL);
+                                  return new Token(ML_STRING_POISON, yyline, yycolumn, string.toString()); }
 }
