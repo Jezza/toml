@@ -1,6 +1,7 @@
 package com.github.jezza.util;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -64,11 +65,11 @@ public final class Strings {
 
 	public static List<String> split(String input) {
 		if (input.isEmpty()) {
-			return List.of();
+			return Collections.emptyList();
 		}
 		int index = input.indexOf('.');
 		if (index == -1) {
-			return List.of(input);
+			return Collections.singletonList(input);
 		}
 		String[] segments = {
 				input.substring(0, index)
@@ -85,6 +86,6 @@ public final class Strings {
 			segments = Arrays.copyOf(segments, length + 1);
 			segments[length] = input.substring(mark);
 		}
-		return List.of(segments);
+		return Arrays.asList(segments);
 	}
 }

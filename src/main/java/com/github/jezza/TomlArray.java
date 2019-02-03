@@ -160,7 +160,9 @@ public final class TomlArray implements List<Object> {
 		b.append("[\n");
 
 		for (Object value : array) {
-			b.append(" ".repeat(indent * increment));
+			for (int i = 0, l = indent * increment; i < l; i++) {
+				b.append(' ');
+			}
 			if (value instanceof TomlTable) {
 				((TomlTable) value).write(b, indent + increment, increment);
 			} else if (value instanceof TomlArray) {
@@ -181,7 +183,9 @@ public final class TomlArray implements List<Object> {
 		}
 		int v = (indent - increment) * increment;
 		if (v > 0) {
-			b.append(" ".repeat(v));
+			for (int i = 0; i < v; i++) {
+				b.append(' ');
+			}
 		}
 		b.append(']');
 	}

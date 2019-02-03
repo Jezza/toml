@@ -3,8 +3,7 @@ package com.github.jezza;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.io.StringReader;
-import java.util.List;
+import java.util.Arrays;
 
 import com.github.jezza.lang.TomlParser;
 
@@ -54,7 +53,7 @@ public final class Toml {
 	}
 
 	public static TomlTable from(Reader... inputs) throws IOException {
-		return fromReaders(List.of(inputs));
+		return fromReaders(Arrays.asList(inputs));
 	}
 
 	public static TomlTable fromReaders(Iterable<? extends Reader> it) throws IOException {
@@ -66,7 +65,7 @@ public final class Toml {
 	}
 
 	public static TomlTable from(InputStream... inputs) throws IOException {
-		return fromInputStreams(List.of(inputs));
+		return fromInputStreams(Arrays.asList(inputs));
 	}
 
 	public static TomlTable fromInputStreams(Iterable<? extends InputStream> it) throws IOException {
