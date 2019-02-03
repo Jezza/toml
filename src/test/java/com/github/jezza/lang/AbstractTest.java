@@ -3,6 +3,7 @@ package com.github.jezza.lang;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -68,7 +69,15 @@ abstract class AbstractTest {
 		// Yeah, I know I shouldn't use a toString to verify tests...
 		// But I'm a lazy fuck...
 		String output = parseFile(file).toString();
-		String content = new String(locate(expected).readAllBytes(), StandardCharsets.UTF_8);
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		byte[] buffer = new byte[8192];
+		try (InputStream in = locate(expected)) {
+			int c;
+			while ((c = in.read(buffer)) != -1) {
+				out.write(buffer, 0, c);
+			}
+		}
+		String content = out.toString("UTF-8");
 		assertEquals(content, output);
 	}
 }

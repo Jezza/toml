@@ -232,7 +232,7 @@ public class TomlParser {
 				segments[length] = value;
 			}
 		}
-		return List.of(segments);
+		return Arrays.asList(segments);
 	}
 
 	protected Object value() throws IOException {

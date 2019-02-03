@@ -214,7 +214,10 @@ public final class TomlTable {
 		b.append("{\n");
 
 		for (Entry<String, Object> entry : table.entrySet()) {
-			b.append(" ".repeat(indent * increment)).append(entry.getKey()).append(" = ");
+			for (int i = 0, l = indent * increment; i < l; i++) {
+				b.append(' ');
+			}
+			b.append(entry.getKey()).append(" = ");
 			Object value = entry.getValue();
 			if (value instanceof TomlTable) {
 				((TomlTable) value).write(b, indent + increment, increment);
@@ -236,7 +239,9 @@ public final class TomlTable {
 		}
 		int v = (indent - increment) * increment;
 		if (v > 0) {
-			b.append(" ".repeat(v));
+			for (int i = 0; i < v; i++) {
+				b.append(' ');
+			}
 		}
 		b.append('}');
 	}
