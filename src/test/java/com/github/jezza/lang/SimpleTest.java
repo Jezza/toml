@@ -118,4 +118,9 @@ final class SimpleTest extends AbstractTest {
 			assertEquals(values, entry.get("values"));
 		}
 	}
+
+	@Test
+	void numberedKeys() throws IOException {
+		compareOutput("/number-keys.txt", "/number-keys.toml");
+	}
 }

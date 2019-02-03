@@ -77,7 +77,7 @@ public class TomlParser {
 	}
 
 	public final TomlTable parse() throws IOException {
-		TomlTable table = new TomlTable();
+		TomlTable table = new TomlTable(4);
 		parse(table);
 		return table;
 	}
@@ -105,15 +105,18 @@ public class TomlParser {
 					newArray.add(current);
 				} else {
 //					System.out.println(key + " => std-table");
-					Object value = root.computeIfAbsent(key, k -> new TomlTable());
+					Object value = root.computeIfAbsent(key, k -> new TomlTable(4));
 					if (!(value instanceof TomlTable)) {
 						throw new IllegalStateException("Incompatible signatures: " + key + " => " + value);
 					}
 					current = ((TomlTable) value);
 				}
-			} else if (type == Tokens.KEY || type == Tokens.STRING || type == Tokens.INTEGER_DEC) {
+			} else if (isKey(type)) {
+				int row = c.row;
 				List<String> key = key();
-				consume(Tokens.EQ);
+				if (consume(Tokens.EQ).row != row || current().row != row) {
+					throw new IllegalStateException("[ERROR] Key-Value pair not on same line: " + row);
+				}
 				Object value = value();
 				current.put(key, value);
 //				System.out.println(key + " => " + value);
@@ -166,28 +169,68 @@ public class TomlParser {
 		return table;
 	}
 
+	private static boolean isKey(int type) {
+		return type == Tokens.KEY
+				|| type == Tokens.STRING
+				|| type == Tokens.INTEGER_DEC
+				|| type == Tokens.INTEGER_HEX
+				|| type == Tokens.INTEGER_OCT
+				|| type == Tokens.INTEGER_BIN
+				|| type == Tokens.FLOAT;
+	}
+
 	protected List<String> key() throws IOException {
-		// It assumes you've already checked the token...
 		Token t = consume();
 		int row = t.row;
-		assert t.type == Tokens.KEY || t.type == Tokens.STRING || t.type == Tokens.INTEGER_DEC;
-		String[] segments = {
-				t.value
-		};
+		if (!isKey(t.type)) {
+			throw new IllegalStateException("[ERROR] unexpected token: " + t + " ['{KEY}' | '{STRING}']");
+		}
+		// Just a bit of a hack with regards to numbered keys.
+		// A simple dotted key composed of two integer keys ends up getting lexed as a float.
+		// eg, `1.0` should be parsed as `1`.`0`, but instead we pick it as: `1.0`
+		// This code just tears it apart, and inserts it as two segments.
+		String[] segments;
+		if (t.type == Tokens.FLOAT) {
+			String value = t.value;
+			int i = value.indexOf('.');
+			String first = value.substring(0, i);
+			String second = value.substring(i + 1);
+			segments = new String[]{
+					first,
+					second
+			};
+		} else {
+			segments = new String[]{
+					t.value
+			};
+		}
 		while (current().type == Tokens.DOT) {
 			if (consume().row != row) {
 				throw new IllegalStateException("[ERROR] Dotted key not on same line: " + row);
 			}
 			Token next = current();
-			if (next.type != Tokens.KEY && next.type != Tokens.STRING && next.type != Tokens.INTEGER_DEC) {
+			if (!isKey(next.type)) {
 				throw new IllegalStateException("[ERROR] unexpected token: " + next + " ['{KEY}' | '{STRING}']");
 			}
 			if (consume().row != row) {
 				throw new IllegalStateException("[ERROR] Dotted key not on same line: " + row);
 			}
-			int length = segments.length;
-			segments = Arrays.copyOf(segments, length + 1);
-			segments[length] = next.value;
+			String value = next.value;
+			// Just a bit of a hack with regards to numbered keys.
+			// A simple dotted key composed of two integer keys ends up getting lexed as a float.
+			// eg, `1.0` should be parsed as `1`.`0`, but instead we pick it as: `1.0`
+			// This code just tears it apart, and inserts it as two segments.
+			if (next.type == Tokens.FLOAT) {
+				int i = value.indexOf('.');
+				int length = segments.length;
+				segments = Arrays.copyOf(segments, length + 2);
+				segments[length] = value.substring(0, i);
+				segments[length + 1] = value.substring(i + 1);
+			} else {
+				int length = segments.length;
+				segments = Arrays.copyOf(segments, length + 1);
+				segments[length] = value;
+			}
 		}
 		return List.of(segments);
 	}
@@ -198,6 +241,7 @@ public class TomlParser {
 			case Tokens.STRING_POISON:
 			case Tokens.ML_STRING_POISON:
 				// @TODO Jezza - 26 Jan. 2019: Check some strict flag or something?
+				throw new IllegalStateException("[ERROR] Illegal string starting at [" + c.row + ':' + c.col + ']');
 			case Tokens.STRING:
 			case Tokens.ML_STRING:
 				consume();
@@ -258,9 +302,9 @@ public class TomlParser {
 	}
 
 	protected static Long intoLong(Token token, int offset, int radix) {
-		// @TODO Jezza - 26 Jan. 2019: I should build up the correct number in the lexer... (Without '_')
+		// @TODO Jezza - 26 Jan. 2019: I should build up the correct number in the lexer... (Without '_' and number prefix...)
 		String input = token.value.replace("_", "");
-		return Long.parseLong(offset > 0
+		return Long.valueOf(offset > 0
 				? input.substring(offset)
 				: input, radix);
 	}
@@ -268,6 +312,6 @@ public class TomlParser {
 	protected static Double intoDouble(Token token) {
 		// @TODO Jezza - 26 Jan. 2019: I should build up the correct number in the lexer... (Without '_')
 		String input = token.value.replace("_", "");
-		return Double.parseDouble(input);
+		return Double.valueOf(input);
 	}
 }

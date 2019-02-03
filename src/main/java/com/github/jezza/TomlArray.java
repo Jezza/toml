@@ -22,7 +22,7 @@ public final class TomlArray implements List<Object> {
 	private final List<Object> array;
 
 	public TomlArray() {
-		this(new ArrayList<>());
+		this(new ArrayList<>(0));
 	}
 
 	public TomlArray(int initialCapacity) {

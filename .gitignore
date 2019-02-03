@@ -1,3 +1,4 @@
 .idea/
 target/
-src/main/java/com/github/jezza/lang/_TomlLexer\.java
+/src/main/java/com/github/jezza/lang/_TomlLexer.java
+/src/main/java/com/github/jezza/lang/_TomlLexer.java~

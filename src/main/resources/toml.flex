@@ -8,6 +8,7 @@ import java.io.StringReader;
 
 %{
 	private final StringBuilder string = new StringBuilder(32);
+	private int lineStart;
 
 	public _TomlLexer(String in) {
 		this(new StringReader(in));
@@ -71,11 +72,11 @@ ML_LITERAL_STRING_CHAR = {EOL_WS} | [\u0009\u0020-\u0026\u0028-\u007E\u0080-\U10
   {COMMENT}             {}
 
   \"                    { string.setLength(0); yybegin(S_BASIC_STRING); }
-  \"\"\"{EOL}           { string.setLength(0); yybegin(S_ML_BASIC_STRING); }
-  \"\"\"                { string.setLength(0); yybegin(S_ML_BASIC_STRING); }
+  \"\"\"{EOL}           { string.setLength(0); lineStart = yyline; yybegin(S_ML_BASIC_STRING); }
+  \"\"\"                { string.setLength(0); lineStart = yyline; yybegin(S_ML_BASIC_STRING); }
   '                     { string.setLength(0); yybegin(S_LITERAL_STRING); }
-  '''{EOL}              { string.setLength(0); yybegin(S_ML_LITERAL_STRING); }
-  '''                   { string.setLength(0); yybegin(S_ML_LITERAL_STRING); }
+  '''{EOL}              { string.setLength(0); lineStart = yyline; yybegin(S_ML_LITERAL_STRING); }
+  '''                   { string.setLength(0); lineStart = yyline; yybegin(S_ML_LITERAL_STRING); }
 
   {INTEGER_DEC}         { return new Token(INTEGER_DEC, yyline, yycolumn, yytext()); }
   {INTEGER_HEX}         { return new Token(INTEGER_HEX, yyline, yycolumn, yytext()); }
@@ -128,7 +129,7 @@ ML_LITERAL_STRING_CHAR = {EOL_WS} | [\u0009\u0020-\u0026\u0028-\u007E\u0080-\U10
 
 <S_ML_BASIC_STRING> {
 	\"\"\"                         { yybegin(YYINITIAL);
-                                     return new Token(ML_STRING, yyline, yycolumn, string.toString()); }
+                                     return new Token(ML_STRING, lineStart, yycolumn, string.toString()); }
     \\{EOL_WS}                     { }
 
 	{ML_BASIC_STRING_CHAR}+        { string.append(yytext()); }
@@ -159,7 +160,7 @@ ML_LITERAL_STRING_CHAR = {EOL_WS} | [\u0009\u0020-\u0026\u0028-\u007E\u0080-\U10
 
 <S_ML_LITERAL_STRING> {
 	'''                         { yybegin(YYINITIAL);
-                                  return new Token(ML_STRING, yyline, yycolumn, string.toString()); }
+                                  return new Token(ML_STRING, lineStart, yycolumn, string.toString()); }
 
 	{ML_LITERAL_STRING_CHAR}+   { string.append(yytext()); }
 
@@ -167,5 +168,5 @@ ML_LITERAL_STRING_CHAR = {EOL_WS} | [\u0009\u0020-\u0026\u0028-\u007E\u0080-\U10
 	'                           { string.append('\''); }
 
 	[^]                         { yybegin(YYINITIAL);
-                                  return new Token(ML_STRING_POISON, yyline, yycolumn, string.toString()); }
+                                  return new Token(ML_STRING_POISON, lineStart, yycolumn, string.toString()); }
 }

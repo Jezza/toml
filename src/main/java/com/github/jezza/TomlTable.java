@@ -28,7 +28,15 @@ public final class TomlTable {
 	private final Map<String, Object> table;
 
 	public TomlTable() {
-		this(new LinkedHashMap<>());
+		this(new LinkedHashMap<>(0));
+	}
+
+	public TomlTable(int initialCapacity) {
+		this(new LinkedHashMap<>(initialCapacity));
+	}
+
+	public TomlTable(int initialCapacity, float loadFactor) {
+		this(new LinkedHashMap<>(initialCapacity, loadFactor));
 	}
 
 	public TomlTable(Map<String, Object> table) {
@@ -38,7 +46,7 @@ public final class TomlTable {
 	public Map<String, Object> asMap() {
 		return table;
 	}
-	
+
 	public boolean isEmpty() {
 		return table.isEmpty();
 	}
