@@ -37,17 +37,20 @@ public class TomlParser {
 	}
 
 	protected final Token current() throws IOException {
-		return current != null
-				? current
-				: (current = lexer.next());
+		Token current = this.current;
+		if (current == null) {
+			current = lexer.next();
+			this.current = current;
+		}
+		return current;
 	}
 
 	protected final boolean match(int type) throws IOException {
-		boolean match = current().type == type;
-		if (match) {
+		if (is(type)) {
 			current = null;
+			return true;
 		}
-		return match;
+		return false;
 	}
 
 	protected final boolean is(int type) throws IOException {
@@ -59,10 +62,10 @@ public class TomlParser {
 	}
 
 	protected final Token consume() throws IOException {
+		Token current = this.current;
 		if (current == null) {
 			return lexer.next();
 		}
-		Token current = this.current;
 		this.current = null;
 		return current;
 	}
@@ -73,7 +76,11 @@ public class TomlParser {
 			current = null;
 			return token;
 		}
-		throw new RuntimeException(Strings.format("Unexpected token: {}, expected {}.", token, Tokens.name(type)));
+		throw unexpected(token, type);
+	}
+
+	private static RuntimeException unexpected(Token token, int type) {
+		throw new IllegalStateException(Strings.format("Unexpected token: {}, expected {}.", token, Tokens.name(type)));
 	}
 
 	public final TomlTable parse() throws IOException {
@@ -94,20 +101,18 @@ public class TomlParser {
 				List<String> key = key();
 				consume(Tokens.RBRACKET);
 				if (array) {
-//					System.out.println(key + " => array-table");
 					consume(Tokens.RBRACKET);
 					Object value = root.computeIfAbsent(key, k -> new TomlArray(0));
 					if (!(value instanceof TomlArray)) {
-						throw new IllegalStateException("Attempted to redefine object as array. (" + key + " => " + value + ')');
+						throw new IllegalStateException("Attempted to redefine " + key + " as array. [Already defined as " + value.getClass().getName() + ']');
 					}
 					TomlArray newArray = (TomlArray) value;
 					current = new TomlTable();
 					newArray.add(current);
 				} else {
-//					System.out.println(key + " => std-table");
 					Object value = root.computeIfAbsent(key, k -> new TomlTable(4));
 					if (!(value instanceof TomlTable)) {
-						throw new IllegalStateException("Incompatible signatures: " + key + " => " + value);
+						throw new IllegalStateException("Attempted to redefine " + key + " as table. [Already defined as " + value.getClass().getName() + ']');
 					}
 					current = ((TomlTable) value);
 				}
@@ -118,12 +123,15 @@ public class TomlParser {
 					throw new IllegalStateException("[ERROR] Key-Value pair not on same line: " + row);
 				}
 				Object value = value();
-				current.put(key, value);
-//				System.out.println(key + " => " + value);
+				Object old = current.put(key, value);
+				if (old != null && old.getClass() != value.getClass()) {
+					throw new IllegalStateException("Attempted to redefine " + key + " as " + value.getClass().getName() + ". [Already defined as " + old.getClass().getName() + ']');
+				}
 			} else {
 				throw new IllegalStateException("[ERROR] unexpected token: " + c + " ['{KEY}' | '{STRING}' | '[']");
 			}
 		}
+
 		return root;
 	}
 
