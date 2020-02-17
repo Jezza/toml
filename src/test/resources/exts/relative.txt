@@ -1,0 +1,22 @@
+TomlTable {
+    items = [
+        {
+            id = "0",
+            metadata = {
+                special = "0-0",
+            },
+        },
+        {
+            id = "1",
+            metadata = {
+                special = "1-0",
+            },
+        },
+        {
+            id = "2",
+            metadata = {
+                special = "2-0",
+            },
+        },
+    ],
+}

@@ -3,6 +3,7 @@ package com.github.jezza;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.StringReader;
 import java.util.List;
 
 import com.github.jezza.lang.TomlParser;
@@ -11,6 +12,27 @@ import com.github.jezza.lang.TomlParser;
  * @author Jezza
  */
 public final class Toml {
+	public static final String NONSTANDARD_EXTENSIONS_KEY = "com.github.jezza.toml.nonstandard";
+
+	/**
+	 * This feature flag hides all of the nonstandard extensions so anyone
+	 * who uses this library in its default state can freely switch to another
+	 * library without relying on some feature that we provide.
+	 * (Yes, they'll still have to migrate classes, but they won't have to migrate data files.)
+	 * <p>
+	 * If this is activated, then the developer has acknowledged the use of nonstandard features.
+	 * (Technically, it's a VM flag, so it could be activated by another library, and the developer could have no knowledge of it... )
+	 * <p>
+	 * <strong>Current Extensions:</strong>
+	 * <ul>
+	 * <li>
+	 * <strong>Relative table paths: [.value]</strong>
+	 * When specifying a table section, you can use a shorthand to append to previous table.
+	 * </li>
+	 * </ul>
+	 */
+	public static final boolean NONSTANDARD_EXTENSIONS = Boolean.getBoolean(NONSTANDARD_EXTENSIONS_KEY);
+
 	private Toml() {
 		throw new IllegalStateException();
 	}

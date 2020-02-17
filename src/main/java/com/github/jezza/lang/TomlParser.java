@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
+import com.github.jezza.Toml;
 import com.github.jezza.TomlArray;
 import com.github.jezza.TomlTable;
 import com.github.jezza.util.Strings;
@@ -98,11 +99,15 @@ public class TomlParser {
 			if (type == Tokens.LBRACKET) {
 				consume();
 				boolean array = match(Tokens.LBRACKET);
+				boolean relative = Toml.NONSTANDARD_EXTENSIONS && match(Tokens.DOT);
 				List<String> key = key();
 				consume(Tokens.RBRACKET);
+				TomlTable context = relative
+						? current
+						: root;
 				if (array) {
 					consume(Tokens.RBRACKET);
-					Object value = root.computeIfAbsent(key, k -> new TomlArray(0));
+					Object value = context.computeIfAbsent(key, k -> new TomlArray(0));
 					if (!(value instanceof TomlArray)) {
 						throw new IllegalStateException("Attempted to redefine " + key + " as array. [Already defined as " + value.getClass().getName() + ']');
 					}
@@ -110,7 +115,7 @@ public class TomlParser {
 					current = new TomlTable();
 					newArray.add(current);
 				} else {
-					Object value = root.computeIfAbsent(key, k -> new TomlTable(4));
+					Object value = context.computeIfAbsent(key, k -> new TomlTable(4));
 					if (!(value instanceof TomlTable)) {
 						throw new IllegalStateException("Attempted to redefine " + key + " as table. [Already defined as " + value.getClass().getName() + ']');
 					}
@@ -150,7 +155,7 @@ public class TomlParser {
 
 	protected TomlTable inlineTable() throws IOException {
 		int row = consume(Tokens.LBRACE).row;
-		TomlTable table = new TomlTable();
+		TomlTable table = new TomlTable(0);
 		if (is(Tokens.RBRACE)) {
 			if (consume().row != row) {
 				throw new IllegalStateException("[ERROR] Inline table not on same line: " + row);
@@ -159,18 +164,19 @@ public class TomlParser {
 		}
 		do {
 			List<String> key = key();
-			if (consume(Tokens.EQ).row != row || current().row != row) {
+			consume(Tokens.EQ);
+			if (current().row != row) {
 				throw new IllegalStateException("[ERROR] Inline table not on same line: " + row);
 			}
 			Object value = value();
-			table.put(key, value);
-			if (!is(Tokens.COMMA)) {
-				break;
+			Object old = table.put(key, value);
+			if (old != null) {
+				if (old.getClass() != value.getClass()) {
+					throw new IllegalStateException("Attempted to redefine " + key + " as " + value.getClass().getName() + ". [Already defined as " + old.getClass().getName() + ']');
+				}
+				throw new IllegalStateException("Duplicate key " + key + ". [Defined as " + old.getClass().getName() + ']');
 			}
-			if (consume().row != row) {
-				throw new IllegalStateException("[ERROR] Inline table not on same line: " + row);
-			}
-		} while (true);
+		} while (match(Tokens.COMMA));
 		if (consume(Tokens.RBRACE).row != row) {
 			throw new IllegalStateException("[ERROR] Inline table not on same line: " + row);
 		}

@@ -33,6 +33,10 @@ public final class TomlArray implements List<Object> {
 		this.array = Objects.requireNonNull(array);
 	}
 
+	public List<Object> asList() {
+		return array;
+	}
+
 	@Override
 	public boolean isEmpty() {
 		return array.isEmpty();

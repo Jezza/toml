@@ -22,8 +22,7 @@ final class LiteralStringTest extends AbstractTest {
 	@Test
 	void linebreak_poison() throws IOException {
 		_TomlLexer lexer = lex("'value\nloop'");
-		Token token = lexer.next();
-		assertEquals(Tokens.STRING_POISON, token.type, "Token isn't a poison string");
+		assertEquals(Tokens.STRING_POISON, lexer.next().type, "Token isn't a poison string");
 		assertEquals(Tokens.KEY, lexer.next().type, "Failed to read next token. [Expected a key, as it's a poisoned string]");
 		assertEquals(Tokens.EOS, lexer.next().type, "Failed to consume all input");
 	}
